@@ -11,12 +11,12 @@ import           Data.Text                        (Text)
 import qualified Data.Text                 as T 
 import qualified Data.Text.Encoding        as TE  (decodeUtf8,encodeUtf8)
 --
-import           Type.Doc
+
+data Paragraph tag = Paragraph { para_content :: [(Text,tag)] } deriving Show
 
 data ChunkedText tag = Normal (Text,tag)
                      | Split
                     
-
 deriving instance (Show tag) => Show (ChunkedText tag)
 
 instance Eq (ChunkedText tag) where
