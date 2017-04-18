@@ -33,22 +33,18 @@ chunkAt n lst = let (bef,aft) = break (\(b,e,_) -> n >= b && n < e) lst
 
 chunkEveryAt n lst = go 0 [] lst
   where go m acc xs = let (bef,aft) = chunkAt (m+n) xs
-                      in if null aft then acc else go (m+n) (acc++[bef]) aft
+                      in if null aft then acc++[bef] else go (m+n) (acc++[bef]) aft
+
         
              
 
-{-
-
-((b,e,(t,m)):xs) (ys,y)
-  | n < b           = chunkEveryAt n     xs (ys,y `snoc` (b,e,(t,m)))
-  | n == b          = chunkEveryAt (n-b) xs (ys `snoc` y,[])
-  | n > b && n < e  = chunkEveryAt  
--}
 main = do -- mapM_ cutePrintAnnot (lineSplitAnnot 80 ann)
    --  cutePrintAnnot ann
     -- cutePrintAnnot ann2
     -- print (lineSplitAnnot 80 ann0)
    let marked = markPosition (unAnnotText ann0)
    print $ chunkAt 80 marked
-
-   print $ chunkEveryAt 80 marked
+   let chunked = (chunkEveryAt 80 marked)
+   mapM_ print chunked
+   putStrLn "-------------------"
+   mapM_ cutePrintAnnot $ map (AnnotText . map (\(_,_,x)->x)) chunked 
