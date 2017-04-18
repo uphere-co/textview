@@ -22,22 +22,9 @@ ann1 = AnnotText [(T.take 30 txt,False)
 
 ann2 = AnnotText [((T.drop 80 . T.take 160) txt, False)]
 
-markPosition xs = let xs' = scanl (\(a,_) y -> (a + T.length (fst y) ,y)) (0,("",False)) xs   
-                  in zipWith (\x0 x1 -> (fst x0+1,fst x1,snd x1)) xs' (tail xs')
 
-chunkAt n lst = let (bef,aft) = break (\(b,e,_) -> n >= b && n < e) lst
-                in case aft of
-                     [] -> (bef,[])
-                     ((b,e,(t,m)):xs) -> let (t0,t1) = T.splitAt (n-b) t
-                                         in (bef ++[(b,n,(t0,m))],(n+1,e,(t1,m)):xs)
-
-chunkEveryAt n lst = go 0 [] lst
-  where go m acc xs = let (bef,aft) = chunkAt (m+n) xs
-                      in if null aft then acc++[bef] else go (m+n) (acc++[bef]) aft
-
-        
-             
-
+main = mapM_ cutePrintAnnot (lineSplitAnnot 80 ann0)
+{-
 main = do -- mapM_ cutePrintAnnot (lineSplitAnnot 80 ann)
    --  cutePrintAnnot ann
     -- cutePrintAnnot ann2
@@ -48,3 +35,4 @@ main = do -- mapM_ cutePrintAnnot (lineSplitAnnot 80 ann)
    mapM_ print chunked
    putStrLn "-------------------"
    mapM_ cutePrintAnnot $ map (AnnotText . map (\(_,_,x)->x)) chunked 
+-}

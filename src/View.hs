@@ -20,6 +20,31 @@ checkLength at = sum $ map (\x -> T.length (fst x)) (unAnnotText at)
 checkLengthUnA :: [(Text,Bool)] -> Int
 checkLengthUnA uat = sum $ map (\x -> T.length (fst x)) uat
 
+
+
+
+markPosition xs = let xs' = scanl (\(a,_) y -> (a + T.length (fst y) ,y)) (0,("",False)) xs   
+                  in zipWith (\x0 x1 -> (fst x0+1,fst x1,snd x1)) xs' (tail xs')
+
+chunkAt n lst = let (bef,aft) = break (\(b,e,_) -> n >= b && n < e) lst
+                in case aft of
+                     [] -> (bef,[])
+                     ((b,e,(t,m)):xs) -> let (t0,t1) = T.splitAt (n-b) t
+                                         in (bef ++[(b,n,(t0,m))],(n+1,e,(t1,m)):xs)
+
+chunkEveryAt n lst = go 0 [] lst
+  where go m acc xs = let (bef,aft) = chunkAt (m+n) xs
+                      in if null aft then acc++[bef] else go (m+n) (acc++[bef]) aft
+
+
+lineSplitAnnot :: Int -> AnnotText -> [AnnotText]
+lineSplitAnnot n = map (AnnotText . map (\(_,_,x)->x)) . chunkEveryAt n . markPosition . unAnnotText
+
+        
+{-
+
+
+
 -- This should break when if-condition meets False case for the first time
 takeUnder :: Int -> AnnotText -> AnnotText
 takeUnder n at =
@@ -42,6 +67,7 @@ lineSplitAnnot n at = (takeUnder n at) : ( remained )
  where remained = case (remainAbove n at) of
                     Just  v -> lineSplitAnnot n v
                     Nothing -> []    
+-}
 
 -- lineSplitAnnot80 = lineSplitAnnot 80
 -- takeUnder80 = takeUnder 80
