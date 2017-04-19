@@ -6,6 +6,7 @@ module View where
 
 import           Control.Monad                 (forM_)
 import           Data.List                     (foldl',intersperse,nub)
+import           Data.List.Split               (splitWhen)
 import           Data.Text                     (Text)
 import qualified Data.Text              as T
 import qualified Data.Text.IO           as TIO
@@ -54,8 +55,17 @@ chunkLines (b,e,(t,m)) = let f (a,_) (Chunked x) = let l = T.length x in (a+l, C
                          in map g (zip ys (tail ys))
 
 
-lineSplitAnnot :: Int -> AnnotText -> [AnnotText]
-lineSplitAnnot n = map (AnnotText . map (\(_,_,x)->x)) . chunkEveryAt n . markPosition . unAnnotText
+-- lineSplitAnnot :: Int -> AnnotText -> [AnnotText]
+-- lineSplitAnnot n = map (AnnotText . map (\(_,_,x)->x)) . chunkEveryAt n . markPosition . unAnnotText
+
+lineSplitAnnot :: Int -> AnnotText -> [[AnnotText]]
+lineSplitAnnot n (AnnotText tagged) = 
+  let marked = markPosition tagged
+      chunked = concatMap chunkLines marked
+      renormed = map (map (\(b,e,x) -> (b,e,unChunk x))) . splitWhen (\(_,_,x) -> x == Splitted) $ chunked
+  in map (map (AnnotText . map (\(_,_,x)->x)) . chunkEveryAt n) renormed
+  -- mapM_ print renormed
+
 
         
 {-
