@@ -1,10 +1,12 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module View where
 
 import           Control.Monad                 (forM_)
-import           Data.List                     (foldl',nub)
+import           Data.List                     (foldl',intersperse,nub)
+import           Data.List.Split               (splitWhen)
 import           Data.Text                     (Text)
 import qualified Data.Text              as T
 import qualified Data.Text.IO           as TIO
@@ -13,6 +15,7 @@ import           Type
 -- import           Usage
 import           Util
 --
+import           Debug.Trace
 
 checkLength :: AnnotText -> Int
 checkLength at = sum $ map (\x -> T.length (fst x)) (unAnnotText at)
@@ -32,13 +35,37 @@ chunkAt n lst = let (bef,aft) = break (\(b,e,_) -> n >= b && n < e) lst
                      ((b,e,(t,m)):xs) -> let (t0,t1) = T.splitAt (n-b) t
                                          in (bef ++[(b,n,(t0,m))],(n+1,e,(t1,m)):xs)
 
-chunkEveryAt n lst = go 0 [] lst
-  where go m acc xs = let (bef,aft) = chunkAt (m+n) xs
+chunkEveryAt n [] = [] -- go 0 [] lst
+chunkEveryAt n lst@(y:ys) =  go (n0-1) [] lst
+  where (n0,_,_) = y
+        go m acc xs = let (bef,aft) = chunkAt (m+n) xs
                       in if null aft then acc++[bef] else go (m+n) (acc++[bef]) aft
 
 
-lineSplitAnnot :: Int -> AnnotText -> [AnnotText]
-lineSplitAnnot n = map (AnnotText . map (\(_,_,x)->x)) . chunkEveryAt n . markPosition . unAnnotText
+data Chunk a = Chunked  a
+             | Splitted
+             deriving (Show, Functor,Eq)
+
+unChunk (Chunked x) = x
+                      
+chunkLines (b,e,(t,m)) = let f (a,_) (Chunked x) = let l = T.length x in (a+l, Chunked x)
+                             f (a,_) Splitted    = (a+1,Splitted)
+                             ys = scanl f (0,Chunked "") ((intersperse Splitted . map Chunked . T.lines) t)
+                             g ((a0,t0),(a1,t1)) = (b+a0,b+a1-1,fmap (\z->(z,m)) t1)
+                         in map g (zip ys (tail ys))
+
+
+-- lineSplitAnnot :: Int -> AnnotText -> [AnnotText]
+-- lineSplitAnnot n = map (AnnotText . map (\(_,_,x)->x)) . chunkEveryAt n . markPosition . unAnnotText
+
+lineSplitAnnot :: Int -> AnnotText -> [[AnnotText]]
+lineSplitAnnot n (AnnotText tagged) = 
+  let marked = markPosition tagged
+      chunked = concatMap chunkLines marked
+      renormed = map (map (\(b,e,x) -> (b,e,unChunk x))) . splitWhen (\(_,_,x) -> x == Splitted) $ chunked
+  in map (map (AnnotText . map (\(_,_,x)->x)) . chunkEveryAt n) renormed
+  -- mapM_ print renormed
+
 
         
 {-
