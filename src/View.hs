@@ -29,10 +29,10 @@ checkLengthUnA uat = sum $ map (\x -> T.length (fst x)) uat
 markPosition xs = let xs' = scanl (\(a,_) y -> (a + T.length (fst y) ,y)) (0,("",False)) xs   
                   in zipWith (\x0 x1 -> (fst x0+1,fst x1,snd x1)) xs' (tail xs')
 
-chunkAt n lst = let (bef,aft) = break (\(b,e,_) -> n >= b && n < e) lst
+chunkAt n lst = let (bef,aft) = break (\(b,e,_) -> n <= e) lst
                 in case aft of
                      [] -> (bef,[])
-                     ((b,e,(t,m)):xs) -> let (t0,t1) = T.splitAt (n-b) t
+                     ((b,e,(t,m)):xs) -> let (t0,t1) = T.splitAt (n-b+1) t
                                          in (bef ++[(b,n,(t0,m))],(n+1,e,(t1,m)):xs)
 
 chunkEveryAt n [] = [] -- go 0 [] lst
@@ -68,37 +68,7 @@ lineSplitAnnot n (AnnotText tagged) =
 
 
         
-{-
 
-
-
--- This should break when if-condition meets False case for the first time
-takeUnder :: Int -> AnnotText -> AnnotText
-takeUnder n at =
-  let uat = unAnnotText at
-  in AnnotText $ reverse $ fst $ foldl' (\(accl,accb) (t,b) -> if (checkLengthUnA ((t,b):accl) <= n && accb) then ((t,b):accl,accb) else (accl,False)) ([],True) $ take 80 uat
-
-takeUnder' :: Int -> [(Text,Bool)] -> [(Text,Bool)]
-takeUnder' n uat = reverse $ fst $ foldl' (\(accl,accb) (t,b) -> if (checkLengthUnA ((t,b):accl) <= n && accb) then ((t,b):accl,accb) else (accl,False)) ([],True) $ take 80 uat
-
-remainAbove :: Int -> AnnotText -> Maybe AnnotText
-remainAbove n at =
-  let uat = unAnnotText at
-  in if (length uat > 0)
-     then Just $ AnnotText $ drop (length $ unAnnotText $ (takeUnder n at)) uat
-     else Nothing
-
-
-lineSplitAnnot :: Int -> AnnotText -> [AnnotText]
-lineSplitAnnot n at = (takeUnder n at) : ( remained )
- where remained = case (remainAbove n at) of
-                    Just  v -> lineSplitAnnot n v
-                    Nothing -> []    
--}
-
--- lineSplitAnnot80 = lineSplitAnnot 80
--- takeUnder80 = takeUnder 80
--- remainAbove80 = remainAbove 80 
 
 cutePrintAnnot :: AnnotText -> IO ()
 cutePrintAnnot at = do
@@ -113,25 +83,3 @@ cutePrintOnlyAnnot at = do
   let uat = unAnnotText at
   print $ T.intercalate " " $ map (\x -> fst x ) $ filter (\(_,y) -> y) uat
 
-{- 
-cutePrintNER :: [(Int,Int,Text)] -> IO ()
-cutePrintNER mnr = do
-  let ner = getNERList mnr
-  forM_ ner $ \(uid,(txt,pat,i,f)) -> do
-    putStrLn $ (makeFixedString 10 (T.unpack uid)) ++ (makeFixedString 30 (T.unpack txt)) ++ (makeFixedString 30 (T.unpack pat)) ++ "(" ++ (makeFixedString 10 (show i)) ++ "," ++ (makeFixedString 10 (show f)) ++ ")"
---    putStrLn $ (makeFixedString 30 (T.unpack t)) ++ (makeFixedString 30 (T.unpack $ replaceNumber t))++ "(" ++ (makeFixedString 10 (show i)) ++ "," ++ (makeFixedString 10 (show f)) ++ ")"
-
-cutePrintPTW :: [(Int,Int,Text)] -> IO ()
-cutePrintPTW mnr = do
-  let li = nub $ map (\(_,_,t) -> replaceNumber t) mnr
-      uidTag uid' i = T.pack $ uid' ++ (show i)
-      uid = zipWith uidTag (repeat "UID") [(1 :: Int)..]
-      result = zip uid li
-  forM_ result $ \(u',txt) -> do
-    putStrLn $ (makeFixedString 10 (T.unpack u')) ++ (makeFixedString 30 (T.unpack txt))
-
-cutePrint :: [Text] -> IO ()
-cutePrint txts = do
-  forM_ txts $ \t -> do
-    putStrLn (T.unpack t)
--}
