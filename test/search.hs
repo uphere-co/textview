@@ -12,9 +12,12 @@ import           System.Console.Haskeline
 --
 import           SearchTree
 
-searchFunc :: Forest Char -> String -> [String]
-searchFunc ts str = fmap (\x->str++[x]) $ searchForest str ts 
+searchFunc :: Forest (Maybe Char) -> String -> [String]
+searchFunc ts str = fmap (\x->str++ f x) $ searchForest str ts
+  where f (Just x) = [x]
+        f Nothing = "(END)"
 
+  
 main :: IO ()
 main = do
   putStrLn "search"  
