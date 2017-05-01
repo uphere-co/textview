@@ -51,14 +51,6 @@ pTree forest acc =
   in (satisfy (\c -> c `elem` lst') >>= \x -> pTree forest (acc++[x]))
      <|>
      if Nothing `elem` lst then getPos >>= \e -> tokencloser >> return (acc,e) else mzero
-{-       
-  case lst of
-    [] -> do
-      e <- getPos 
-      tokencloser
-      return (acc,e)
-    _ -> do
--}
 
 pTreeAdv :: Forest (Maybe Char) -> Parser (Int,Int,String)
 pTreeAdv forest = skipTill anyChar p
