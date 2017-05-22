@@ -10,7 +10,7 @@ import           Data.Maybe             (isNothing, catMaybes)
 import           Data.Tree
 
 
-addTreeItem :: [a] -> Forest (Maybe a) -> Forest (Maybe a)
+addTreeItem :: (Eq a, Ord a) => [a] -> Forest (Maybe a) -> Forest (Maybe a)
 addTreeItem []     ts = ts
 addTreeItem (x:xs) ts =
   let (prev,rest') = break (\t -> rootLabel t == Just x) ts
@@ -25,7 +25,7 @@ mkTree :: (a,[a]) -> Tree (Maybe a)
 mkTree (x,(y:ys)) = Node (Just x) [mkTree (y,ys)]
 mkTree (x,[])     = Node (Just x) [Node Nothing []]
 
-searchForest :: [a] -> Forest (Maybe a) -> [Maybe a]
+searchForest :: (Eq a, Ord a) => [a] -> Forest (Maybe a) -> [Maybe a]
 searchForest []     ts = map rootLabel ts
 searchForest (x:xs) ts =
   let (prev,rest') = break (\t -> rootLabel t == Just x) ts
@@ -44,7 +44,7 @@ skipTill p end = scan'
 tokencloser :: Parser ()
 tokencloser = void (satisfy (`elem` (" .,!?:;()-+=\"'`/\\|\8217\8220\8221" :: String))) <|> endOfInput
 
-pTree :: Forest (Maybe a) -> [a] -> Parser ([a],Int)
+pTree :: Forest (Maybe Char) -> String -> Parser (String,Int)
 pTree forest acc = 
   let lst = searchForest acc forest
       lst' = catMaybes lst
@@ -53,7 +53,7 @@ pTree forest acc =
      <|>
      if Nothing `elem` lst then getPos >>= \e -> tokencloser >> return (acc,e) else mzero
 
-pTreeAdv :: Forest (Maybe a) -> Parser (Int,Int,[a])
+pTreeAdv :: Forest (Maybe Char) -> Parser (Int,Int,String)
 pTreeAdv forest = skipTill anyChar p
   where p = do
           b <- getPos

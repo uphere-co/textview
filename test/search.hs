@@ -15,10 +15,10 @@ import           System.Console.Haskeline
 --
 import           SearchTree
 
-searchFunc :: Forest (Maybe Char) -> String -> [String]
+searchFunc :: (Eq a, Ord a) => Forest (Maybe a) -> [a] -> [[a]]
 searchFunc ts str = fmap (\x->str++ f x) $ searchForest str ts
   where f (Just x) = [x]
-        f Nothing = "(END)"
+        f Nothing = [] -- "(END)"
 
 makeIdiomForest txt =
   let (lst :: [[String]]) = map (read . T.unpack) $ drop 1 $ T.lines $ txt
@@ -32,6 +32,13 @@ makeF7745Forest txt =
       forest = foldr addTreeItem [] nentities
   in forest
 
+--
+makeTokenForest =
+  let (tokens :: [[String]]) = [["Albert","Einstein"],["Richard","Feynman"],["Steven","Weinberg"]]
+      forest = foldr addTreeItem [] tokens
+  in forest
+--
+
 main :: IO ()
 main = do
   putStrLn "search"
@@ -39,9 +46,10 @@ main = do
   txt' <- TIO.readFile "/data/groups/uphere/data/NLP/idiom.txt"
   let forest1 = makeF7745Forest txt
       forest2 = makeIdiomForest txt'
-      forest  = forest1 ++ forest2
+      forest3 = makeTokenForest
+      forest  = forest3
   runInputT defaultSettings $ whileJust_ (getInputLine "% ") $ \input -> liftIO $ do
-    print $ searchFunc forest input
+    print $ searchFunc forest [input]
 
 main' :: IO ()
 main' = do
