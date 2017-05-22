@@ -40,13 +40,12 @@ main = do
   let forest1 = makeF7745Forest txt
       forest2 = makeIdiomForest txt'
       forest  = forest1 ++ forest2
-  print (take 1 forest2)
   runInputT defaultSettings $ whileJust_ (getInputLine "% ") $ \input -> liftIO $ do
     print $ searchFunc forest input
 
 main' :: IO ()
 main' = do
-  putStrLn "search"  
+  putStrLn "search"
   txt <- TIO.readFile "F7745.all_entities"
   let lst = map ((\(a,b) -> (a,T.drop 1 b)) . T.breakOn "\t") . T.lines $ txt
       nentities = map (T.unpack . snd) lst

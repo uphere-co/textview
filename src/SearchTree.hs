@@ -9,7 +9,8 @@ import           Data.List              (sortBy)
 import           Data.Maybe             (isNothing, catMaybes) 
 import           Data.Tree
 
-addTreeItem :: String -> Forest (Maybe Char) -> Forest (Maybe Char)
+
+addTreeItem :: [a] -> Forest (Maybe a) -> Forest (Maybe a)
 addTreeItem []     ts = ts
 addTreeItem (x:xs) ts =
   let (prev,rest') = break (\t -> rootLabel t == Just x) ts
@@ -20,11 +21,11 @@ addTreeItem (x:xs) ts =
          in prev ++ (matched' : rest)
         
   
-mkTree :: (Char,String) -> Tree (Maybe Char)
+mkTree :: (a,[a]) -> Tree (Maybe a)
 mkTree (x,(y:ys)) = Node (Just x) [mkTree (y,ys)]
 mkTree (x,[])     = Node (Just x) [Node Nothing []]
 
-searchForest :: String -> Forest (Maybe Char) -> [Maybe Char]
+searchForest :: [a] -> Forest (Maybe a) -> [Maybe a]
 searchForest []     ts = map rootLabel ts
 searchForest (x:xs) ts =
   let (prev,rest') = break (\t -> rootLabel t == Just x) ts
@@ -43,7 +44,7 @@ skipTill p end = scan'
 tokencloser :: Parser ()
 tokencloser = void (satisfy (`elem` (" .,!?:;()-+=\"'`/\\|\8217\8220\8221" :: String))) <|> endOfInput
 
-pTree :: Forest (Maybe Char) -> [Char] -> Parser (String,Int)
+pTree :: Forest (Maybe a) -> [a] -> Parser ([a],Int)
 pTree forest acc = 
   let lst = searchForest acc forest
       lst' = catMaybes lst
@@ -52,7 +53,7 @@ pTree forest acc =
      <|>
      if Nothing `elem` lst then getPos >>= \e -> tokencloser >> return (acc,e) else mzero
 
-pTreeAdv :: Forest (Maybe Char) -> Parser (Int,Int,String)
+pTreeAdv :: Forest (Maybe a) -> Parser (Int,Int,[a])
 pTreeAdv forest = skipTill anyChar p
   where p = do
           b <- getPos
