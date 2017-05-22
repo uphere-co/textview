@@ -11,6 +11,7 @@ import           Data.Function          (on)
 import           Data.List              (sortBy)
 import           Data.Maybe             (isNothing, catMaybes) 
 import qualified Data.Text              as T
+import qualified Data.Text.IO           as TIO
 import           Data.Tree
 
 
@@ -91,4 +92,17 @@ makeTokenForest =
   let (tokens :: [[String]]) = [["Albert","Einstein"],["Richard","Feynman"],["Steven","Weinberg"]]
       forest = foldr addTreeItem [] tokens
   in forest
+
+
+
 --
+
+loadIdiom fp = do
+  txt <- TIO.readFile "/data/groups/uphere/data/NLP/idiom.txt"
+  let (lst :: [[String]]) = map (read . T.unpack) $ drop 1 $ T.lines $ txt
+      idiomsent = map head lst
+      nentities = map words idiomsent
+      forest = foldr addTreeItem [] nentities
+  return forest
+  
+
