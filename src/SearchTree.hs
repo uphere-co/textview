@@ -1,3 +1,6 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module SearchTree where
 
 import           Control.Applicative
@@ -7,6 +10,7 @@ import qualified Data.Attoparsec.Internal.Types as AT (Parser(..),fromPos)
 import           Data.Function          (on)
 import           Data.List              (sortBy)
 import           Data.Maybe             (isNothing, catMaybes) 
+import qualified Data.Text              as T
 import           Data.Tree
 
 
@@ -59,3 +63,32 @@ pTreeAdv forest = skipTill anyChar p
           b <- getPos
           (x,e) <- pTree forest []
           return (b+1,e,x)
+
+
+
+
+-----
+
+searchFunc :: (Eq a, Ord a) => Forest (Maybe a) -> [a] -> [[a]]
+searchFunc ts str = fmap (\x->str++ f x) $ searchForest str ts
+  where f (Just x) = [x]
+        f Nothing = [] -- "(END)"
+
+makeIdiomForest txt =
+  let (lst :: [[String]]) = map (read . T.unpack) $ drop 1 $ T.lines $ txt
+      nentities = map head lst
+      forest = foldr addTreeItem [] nentities
+  in forest
+
+makeF7745Forest txt =
+  let lst = map ((\(a,b) -> (a,T.drop 1 b)) . T.breakOn "\t") . T.lines $ txt
+      nentities = map (T.unpack . snd) lst
+      forest = foldr addTreeItem [] nentities
+  in forest
+
+--
+makeTokenForest =
+  let (tokens :: [[String]]) = [["Albert","Einstein"],["Richard","Feynman"],["Steven","Weinberg"]]
+      forest = foldr addTreeItem [] tokens
+  in forest
+--
