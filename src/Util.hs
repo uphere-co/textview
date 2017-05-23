@@ -5,8 +5,6 @@
 module Util where
 
 import           Control.Lens
-import           Control.Monad                (forM_)
-import qualified Data.Char             as DC
 import           Data.List                    (foldl')
 import qualified Data.List.Split       as DLS
 import           Data.Text                    (Text)

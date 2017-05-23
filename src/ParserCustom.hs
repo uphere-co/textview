@@ -7,16 +7,8 @@
 module ParserCustom where
 
 import           Control.Applicative
-import           Control.Monad                        (mzero,void)
-import           Control.Monad.Trans                  (lift)
-import           Data.Attoparsec.Text                 
-import qualified Data.Attoparsec.Internal.Types as AT (Parser(..),fromPos)
-import           Data.Function          (on)
-import           Data.List              (sortBy)
 import           Data.Maybe             (isNothing, catMaybes) 
-import           Data.Text                     (Text)
 import qualified Data.Text              as T
-import qualified Data.Text.IO           as TIO
 import           Data.Tree
 --
 import           Control.Monad.Trans.Either (EitherT(..),left,right)

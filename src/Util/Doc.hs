@@ -8,7 +8,7 @@ import           Control.Lens
 import           Control.Monad.Trans.State        (State,runState,get,put)
 import qualified Data.ByteString.Char8     as B   (drop,take)
 import           Data.Function                    (on)
-import           Data.List                        (intersperse,groupBy,sortBy)
+import           Data.List                        (intersperse,sortBy)
 import           Data.Text                        (Text)
 import qualified Data.Text                 as T 
 import qualified Data.Text.Encoding        as TE  (decodeUtf8,encodeUtf8)

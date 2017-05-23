@@ -8,21 +8,16 @@ module SearchTree where
 
 import           Control.Applicative
 import           Control.Monad                        (mzero,void)
-import           Control.Monad.Trans                  (lift)
 import           Data.Attoparsec.Text                 
 import qualified Data.Attoparsec.Internal.Types as AT (Parser(..),fromPos)
 import           Data.Function          (on)
 import           Data.List              (sortBy)
 import           Data.Maybe             (isNothing, catMaybes) 
-import           Data.Text                     (Text)
+import           Data.Text              (Text)
 import qualified Data.Text              as T
 import qualified Data.Text.IO           as TIO
 import           Data.Tree
 --
-import           Control.Monad.Trans.Either (EitherT(..),left,right)
-import           Control.Monad.State.Lazy   (State(..),get,put)
---
-import           Debug.Trace
 
 addTreeItem :: (Eq a, Ord a) => [a] -> Forest (Maybe a) -> Forest (Maybe a)
 addTreeItem []     ts = ts
@@ -79,23 +74,21 @@ searchFunc ts str = fmap (\x->str++ f x) $ searchForest str ts
   where f (Just x) = [x]
         f Nothing = [] -- "(END)"
 
+makeIdiomForest :: Text -> Forest (Maybe Char)
 makeIdiomForest txt =
   let (lst :: [[String]]) = map (read . T.unpack) $ drop 1 $ T.lines $ txt
       nentities = map head lst
       forest = foldr addTreeItem [] nentities
   in forest
 
+makeF7745Forest :: Text -> Forest (Maybe Char)
 makeF7745Forest txt =
   let lst = map ((\(a,b) -> (a,T.drop 1 b)) . T.breakOn "\t") . T.lines $ txt
       nentities = map (T.unpack . snd) lst
       forest = foldr addTreeItem [] nentities
   in forest
 
-makeTokenForest =
-  let (tokens :: [[String]]) = [["Albert","Einstein"],["Richard","Feynman"],["Steven","Weinberg"]]
-      forest = foldr addTreeItem [] tokens
-  in forest
-
+loadIdiom :: FilePath -> IO (Forest (Maybe String))
 loadIdiom fp = do
   txt <- TIO.readFile "/data/groups/uphere/data/NLP/idiom.txt"
   let (lst :: [[String]]) = map (read . T.unpack) $ drop 1 $ T.lines $ txt
