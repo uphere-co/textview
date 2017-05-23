@@ -28,7 +28,9 @@ library
                        attoparsec,
                        bytestring,
                        containers,
+                       either,
                        lens,
+                       mtl,
                        split,
                        text,
                        transformers
