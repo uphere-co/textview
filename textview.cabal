@@ -19,6 +19,7 @@ library
   exposed-modules:
                     ParserCustom
                     SearchTree
+                    Generic.SearchTree
                     Type
                     Util
                     Util.Doc

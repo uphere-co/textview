@@ -14,10 +14,11 @@ import qualified Data.Text                  as T
 import           Data.Tree
 --
 import           SearchTree
+import           Generic.SearchTree
 
-type Parser' tok = EitherT String (State [tok])
+type ParserG tok = EitherT String (State [tok])
 
-instance {-# OVERLAPPING #-}Alternative (Parser' tok) where
+instance {-# OVERLAPPING #-}Alternative (ParserG tok) where
   empty = EitherT (return (Left "error"))
   e1 <|> e2 = EitherT $ do
     s <- get
@@ -28,30 +29,29 @@ instance {-# OVERLAPPING #-}Alternative (Parser' tok) where
         runEitherT e2
       Right r' -> return $ Right r' 
 
-pTree' :: (Eq a, Ord a) => Forest (Maybe a) -> [a]-> Parser' a [a]
-pTree' forest acc = 
+pTreeG :: (Eq a, Ord a) => Forest (Maybe a) -> [a]-> ParserG a [a]
+pTreeG forest acc = 
   let lst = searchForest acc forest
       lst' = catMaybes lst
-      term = filter isNothing lst
-  in (satisfy' (\c -> c `elem` lst') >>= \x -> pTree' forest (acc++[x]))
+  in (satisfyG (\c -> c `elem` lst') >>= \x -> pTreeG forest (acc++[x]))
      <|>
      if Nothing `elem` lst then return acc else left "not matched!"
 
-pTreeAdv' :: (Eq a, Ord a, Show a) => Forest (Maybe a) -> Parser' a [a]
-pTreeAdv' forest = skipTill' anyChar' p
+pTreeAdvG :: (Eq a, Ord a, Show a) => Forest (Maybe a) -> ParserG a [a]
+pTreeAdvG forest = skipTillG anyTokenG p
   where p = do
-          x <- pTree' forest []
+          x <- pTreeG forest []
           return x
 
-anyChar' :: (Show a) => Parser' a a
-anyChar' = satisfy' $ const True
+anyTokenG :: (Show a) => ParserG a a
+anyTokenG = satisfyG $ const True
 
-skipTill' :: Parser' t a -> Parser' t b -> Parser' t b
-skipTill' p end = scan'
+skipTillG :: ParserG t a -> ParserG t b -> ParserG t b
+skipTillG p end = scan'
   where scan' = end <|> (p *> scan')
 
-satisfy' p = do
+satisfyG p = do
   l <- get
   case l of
-    []     -> left "satisfy': no more input"
-    (x:xs) -> if p x then put xs >> right x else left "satisfy': condition is not satisfied."
+    []     -> left "satisfyG: no more input"
+    (x:xs) -> if p x then put xs >> right x else left "satisfyG: condition is not satisfied."

@@ -15,6 +15,7 @@ import           System.Console.Haskeline
 import           Control.Monad.Trans.Either (EitherT(..),left,right,hoistEither)
 import           Control.Monad.State.Lazy
 --
+import           Generic.SearchTree
 import           SearchTree
 import           ParserCustom
 
@@ -22,6 +23,6 @@ main :: IO ()
 main = do
   putStrLn "search"
   forest <- loadIdiom "/data/groups/uphere/data/NLP/idiom.txt"
-  let s = runState (runEitherT (many $ pTreeAdv' forest)) ["as","long","as","possible","take","care","of","away","from","I"]
+  let s = runState (runEitherT (many $ pTreeAdvG forest)) ["as","long","as","possible","take","care","of","away","from","I"]
   print s
   return ()

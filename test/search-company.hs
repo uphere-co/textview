@@ -13,7 +13,9 @@ import qualified Data.Text.IO           as TIO
 import           Data.Tree
 import           System.Console.Haskeline
 --
+import           Generic.SearchTree
 import           SearchTree
+
 
 main :: IO ()
 main = do
