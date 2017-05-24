@@ -7,12 +7,11 @@
 module ParserCustom where
 
 import           Control.Applicative
-import           Data.Maybe             (isNothing, catMaybes) 
-import qualified Data.Text              as T
+import           Control.Monad.State.Lazy        (State(..),get,put)
+import           Control.Monad.Trans.Either      (EitherT(..),left,right)
+import           Data.Maybe                      (isNothing, catMaybes) 
+import qualified Data.Text                  as T
 import           Data.Tree
---
-import           Control.Monad.Trans.Either (EitherT(..),left,right)
-import           Control.Monad.State.Lazy   (State(..),get,put)
 --
 import           SearchTree
 
@@ -38,7 +37,6 @@ pTree' forest acc =
      <|>
      if Nothing `elem` lst then return acc else left "not matched!"
 
-
 pTreeAdv' :: (Eq a, Ord a, Show a) => Forest (Maybe a) -> Parser' a [a]
 pTreeAdv' forest = skipTill' anyChar' p
   where p = do
@@ -48,13 +46,6 @@ pTreeAdv' forest = skipTill' anyChar' p
 anyChar' :: (Show a) => Parser' a a
 anyChar' = satisfy' $ const True
 
-  {-do
-  l <- lift get
-  trace (show l) $ 
-    case l of
-      []     -> left "anyChar': no more input"
-      (x:xs) -> right x
-  -}
 skipTill' :: Parser' t a -> Parser' t b -> Parser' t b
 skipTill' p end = scan'
   where scan' = end <|> (p *> scan')
