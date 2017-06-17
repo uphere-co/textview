@@ -38,5 +38,5 @@ library
                        transformers
   hs-source-dirs:      src
   default-language:    Haskell2010
-  ghc-options: -threaded -Wall -fno-warn-unused-do-bind -fwarn-tabs -funbox-strict-fields -fno-warn-orphans -O2
+  ghc-options:  -O2 -Wall -Werror -fno-warn-unused-do-bind -fno-warn-orphans
   

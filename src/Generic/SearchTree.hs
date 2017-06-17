@@ -1,23 +1,10 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FlexibleContexts #-}
-
 module Generic.SearchTree where
 
-import           Control.Applicative
-import           Control.Monad                        (mzero,void)
-import           Data.Attoparsec.Text                 
-import qualified Data.Attoparsec.Internal.Types as AT (fromPos)
 import           Data.Function          (on)
 import           Data.List              (sortBy)
-import           Data.Maybe             (isNothing, catMaybes) 
-import           Data.Text              (Text)
-import qualified Data.Text              as T
-import qualified Data.Text.IO           as TIO
 import           Data.Tree
 --
+
 
 addTreeItem :: (Eq a, Ord a) => [a] -> Forest (Maybe a) -> Forest (Maybe a)
 addTreeItem []     ts = ts
@@ -28,18 +15,21 @@ addTreeItem (x:xs) ts =
        matched:rest ->
          let matched' = matched { subForest = addTreeItem xs (subForest matched)}
          in prev ++ (matched' : rest)
-          
+
+            
 mkTree :: (a,[a]) -> Tree (Maybe a)
 mkTree (x,(y:ys)) = Node (Just x) [mkTree (y,ys)]
 mkTree (x,[])     = Node (Just x) [Node Nothing []]
 
+
 searchForest :: (Eq a, Ord a) => [a] -> Forest (Maybe a) -> [Maybe a]
 searchForest []     ts = map rootLabel ts
 searchForest (x:xs) ts =
-  let (prev,rest') = break (\t -> rootLabel t == Just x) ts
+  let (_prev,rest') = break (\t -> rootLabel t == Just x) ts
   in case rest' of
        []           -> [] 
-       matched:rest -> searchForest xs (subForest matched)
+       matched:_    -> searchForest xs (subForest matched)
+
 
 searchFunc :: (Eq a, Ord a) => Forest (Maybe a) -> [a] -> [[a]]
 searchFunc ts str = fmap (\x->str++ f x) $ searchForest str ts
