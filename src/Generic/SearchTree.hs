@@ -44,28 +44,6 @@ searchForest (x:xs) ts =
 searchFunc :: (Eq a, Ord a) => Forest (Maybe a) -> [a] -> [[a]]
 searchFunc ts str = fmap (\x->str++ f x) $ searchForest str ts
   where f (Just x) = [x]
-        f Nothing = [] -- "(END)"
+        f Nothing = []
 
-makeIdiomForest :: Text -> Forest (Maybe Char)
-makeIdiomForest txt =
-  let (lst :: [[String]]) = map (read . T.unpack) $ drop 1 $ T.lines $ txt
-      nentities = map head lst
-      forest = foldr addTreeItem [] nentities
-  in forest
-
-makeF7745Forest :: Text -> Forest (Maybe Char)
-makeF7745Forest txt =
-  let lst = map ((\(a,b) -> (a,T.drop 1 b)) . T.breakOn "\t") . T.lines $ txt
-      nentities = map (T.unpack . snd) lst
-      forest = foldr addTreeItem [] nentities
-  in forest
-
-loadIdiom :: FilePath -> IO (Forest (Maybe String))
-loadIdiom fp = do
-  txt <- TIO.readFile "/data/groups/uphere/data/NLP/idiom.txt"
-  let (lst :: [[String]]) = map (read . T.unpack) $ drop 1 $ T.lines $ txt
-      idiomsent = map head lst
-      nentities = map words idiomsent
-      forest = foldr addTreeItem [] nentities
-  return forest
 
