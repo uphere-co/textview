@@ -2,6 +2,7 @@ module Generic.SearchTree where
 
 import           Data.Function          (on)
 import           Data.List              (sortBy)
+import           Data.Maybe             (maybeToList)
 import           Data.Tree
 --
 
@@ -38,14 +39,8 @@ searchForest :: (Eq a) => [a] -> Forest (Maybe a) -> [Maybe a]
 searchForest = searchForestBy (==)
 
 
-{- 
-searchFuncBy :: (a -> b -> Bool) -> Forest (Maybe b) -> [a] -> [[b]]
-searchFuncBy eq ts str = fmap (\x->str++ f x) $ searchForestBy eq str ts
-  where f (Just x) = [x]
-        f Nothing = []
-
 
 searchFunc :: (Eq a) => Forest (Maybe a) -> [a] -> [[a]]
-searchFunc = searchFuncBy (==)
+searchFunc ts xs = fmap (\x -> xs ++ maybeToList x) $ searchForest xs ts
 
--}
+
