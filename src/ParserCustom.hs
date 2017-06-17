@@ -29,17 +29,9 @@ instance {-# OVERLAPPING #-} Alternative (ParserG tok) where
 
 pTreeG :: (Eq a) => Forest (Maybe a) -> [a]-> ParserG a [a]
 pTreeG = pTreeGBy (==)
-{- 
-pTreeG forest acc = 
-  let lst = searchForest acc forest
-      lst' = catMaybes lst
-  in (satisfyG (\c -> c `elem` lst') >>= \x -> pTreeG forest (acc++[x]))
-     <|>
-     if Nothing `elem` lst then return acc else left "not matched!"
--}
 
 
-pTreeGBy :: (a -> a -> Bool) -> Forest (Maybe a) -> [a]-> ParserG a [a]
+pTreeGBy :: (a -> b -> Bool) -> Forest (Maybe b) -> [a] -> ParserG a [a]
 pTreeGBy eq forest acc = 
   let lst = searchForestBy eq acc forest
       lst' = catMaybes lst
@@ -50,15 +42,9 @@ pTreeGBy eq forest acc =
 
 pTreeAdvG :: (Eq a) => Forest (Maybe a) -> ParserG a [a]
 pTreeAdvG = pTreeAdvGBy (==)
-{- 
-pTreeAdvG forest = skipTillG anyTokenG p
-  where p = do
-          x <- pTreeG forest []
-          return x
--}
 
 
-pTreeAdvGBy :: (a -> a -> Bool) -> Forest (Maybe a) -> ParserG a [a]
+pTreeAdvGBy :: (a -> b -> Bool) -> Forest (Maybe b) -> ParserG a [a]
 pTreeAdvGBy eq forest = skipTillG anyTokenG (pTreeGBy eq forest [])
 
 

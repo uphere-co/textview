@@ -22,13 +22,13 @@ mkTree (x,(y:ys)) = Node (Just x) [mkTree (y,ys)]
 mkTree (x,[])     = Node (Just x) [Node Nothing []]
 
 
-searchForestBy :: (a -> a -> Bool) -> [a] -> Forest (Maybe a) -> [Maybe a]
+searchForestBy :: (a -> b -> Bool) -> [a] -> Forest (Maybe b) -> [Maybe b]
 searchForestBy _  []     ts = map rootLabel ts
 searchForestBy eq (x:xs) ts =
   let Just a `meq` Just b = a `eq` b
       Nothing `meq` Nothing = True
       _ `meq` _ = False
-      (_prev,rest') = break (\t -> rootLabel t `meq` Just x) ts
+      (_prev,rest') = break (\t -> Just x `meq` rootLabel t) ts
   in case rest' of
        []           -> [] 
        matched:_    -> searchForestBy eq xs (subForest matched)
@@ -36,17 +36,10 @@ searchForestBy eq (x:xs) ts =
 
 searchForest :: (Eq a) => [a] -> Forest (Maybe a) -> [Maybe a]
 searchForest = searchForestBy (==)
+
+
 {- 
-searchForest []     ts = map rootLabel ts
-searchForest (x:xs) ts =
-  let (_prev,rest') = break (\t -> rootLabel t == Just x) ts
-  in case rest' of
-       []           -> [] 
-       matched:_    -> searchForest xs (subForest matched)
--}
-
-
-searchFuncBy :: (a -> a -> Bool) -> Forest (Maybe a) -> [a] -> [[a]]
+searchFuncBy :: (a -> b -> Bool) -> Forest (Maybe b) -> [a] -> [[b]]
 searchFuncBy eq ts str = fmap (\x->str++ f x) $ searchForestBy eq str ts
   where f (Just x) = [x]
         f Nothing = []
@@ -54,9 +47,5 @@ searchFuncBy eq ts str = fmap (\x->str++ f x) $ searchForestBy eq str ts
 
 searchFunc :: (Eq a) => Forest (Maybe a) -> [a] -> [[a]]
 searchFunc = searchFuncBy (==)
-{- 
-searchFunc ts str = fmap (\x->str++ f x) $ searchForest str ts
-  where f (Just x) = [x]
-        f Nothing = []
--}
 
+-}
