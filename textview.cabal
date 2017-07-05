@@ -20,6 +20,7 @@ library
                     ParserCustom
                     SearchTree
                     Generic.SearchTree
+                    Text.Format.Tree
                     Type
                     Util
                     Util.Doc
