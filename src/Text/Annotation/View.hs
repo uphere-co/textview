@@ -7,6 +7,7 @@ module Text.Annotation.View where
 
 import           Data.List                     (intersperse)
 import           Data.List.Split               (splitWhen)
+import           Data.Monoid
 import           Data.Text                     (Text)
 import qualified Data.Text              as T
 import qualified Data.Text.IO           as TIO
@@ -72,15 +73,20 @@ lineSplitAnnot def n (AnnotText tagged) =
   in map (map (AnnotText . map (\(_,_,x)->x)) . chunkEveryAt n) renormed
 
 
-cutePrintAnnot :: (tag -> Bool) -> AnnotText tag -> IO ()
-cutePrintAnnot f at = do
+cutePrintAnnotWithLabel :: (tag -> Maybe Text) -> AnnotText tag -> IO ()
+cutePrintAnnotWithLabel lblf at = do
   let uat = unAnnotText at
-      al = foldr (\(x,tag) acc -> if (f tag == True)
-                                  then (T.append (T.replicate (T.length x) "-") acc)
-                                  else (T.append (T.replicate (T.length x) " ") acc)) "" uat
-
+      step (x,tag) acc = let n = T.length x
+                         in case lblf tag of
+                              Just lbl -> T.append (T.take n (lbl <> T.replicate n "-")) acc
+                              Nothing  -> T.append (T.replicate n " ") acc
+      al = foldr step "" uat
   TIO.putStrLn $ T.intercalate "" $ map (\x -> fst x) uat
   TIO.putStrLn al
+
+
+cutePrintAnnot :: (tag -> Bool) -> AnnotText tag -> IO ()
+cutePrintAnnot f = cutePrintAnnotWithLabel (\x -> if f x then Just "" else Nothing)
 
 
 cutePrintOnlyAnnot :: (tag -> Bool) -> AnnotText tag -> IO ()
