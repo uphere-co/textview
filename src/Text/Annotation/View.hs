@@ -1,5 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Text.Annotation.View where
@@ -21,22 +22,24 @@ unChunk :: Chunk t -> t
 unChunk (Chunked x) = x
 unChunk Splitted    = error "unChunk: Splitted"
 
-checkLength :: AnnotText -> Int
+checkLength :: AnnotText tag -> Int
 checkLength = sum . map (\x -> T.length (fst x)) . unAnnotText
 
 
-checkLengthUnA :: [(Text,Bool)] -> Int
+checkLengthUnA :: [(Text,tag)] -> Int
 checkLengthUnA = sum . map (\x -> T.length (fst x))
 
 
-markPosition :: [(Text, Bool)] -> [(Int, Int, (Text, Bool))]
-markPosition xs = let xs' = scanl (\(a,_) y -> (a + T.length (fst y) ,y)) (0,("",False)) xs   
-                  in zipWith (\x0 x1 -> (fst x0+1,fst x1,snd x1)) xs' (tail xs')
+markPosition :: tag                      -- ^ default tag
+             -> [(Text,tag)]
+             -> [(Int, Int, (Text,tag))]
+markPosition def xs = let xs' = scanl (\(a,_) y -> (a + T.length (fst y) ,y)) (0,("",def)) xs   
+                      in zipWith (\x0 x1 -> (fst x0+1,fst x1,snd x1)) xs' (tail xs')
 
 
 chunkAt :: Int
-        -> [(Int, Int, (Text, t))]
-        -> ([(Int, Int, (Text, t))], [(Int, Int, (Text, t))])
+        -> [(Int, Int, (Text, tag))]
+        -> ([(Int, Int, (Text, tag))], [(Int, Int, (Text, tag))])
 chunkAt n lst = let (bef,aft) = break (\(_b,e,_) -> n <= e) lst
                 in case aft of
                      [] -> (bef,[])
@@ -44,8 +47,8 @@ chunkAt n lst = let (bef,aft) = break (\(_b,e,_) -> n <= e) lst
                                          in (bef ++[(b,n,(t0,m))],(n+1,e,(t1,m)):xs)
 
 
-chunkEveryAt :: Int -> [(Int, Int, (Text, t))]
-             -> [[(Int, Int, (Text, t))]]
+chunkEveryAt :: Int -> [(Int, Int, (Text, tag))]
+             -> [[(Int, Int, (Text, tag))]]
 chunkEveryAt _n [] = []
 chunkEveryAt n lst@(y:_) =  go (n0-1) [] lst
   where (n0,_,_) = y
@@ -53,7 +56,7 @@ chunkEveryAt n lst@(y:_) =  go (n0-1) [] lst
                       in if null aft then acc++[bef] else go (m+n) (acc++[bef]) aft
 
 
-chunkLines :: (Int, t, (Text, t1)) -> [(Int, Int, Chunk (Text, t1))]
+chunkLines :: (Int, t, (Text, tag)) -> [(Int, Int, Chunk (Text, tag))]
 chunkLines (b,_e,(t,m)) = let f (a,_) (Chunked x) = let l = T.length x in (a+l, Chunked x)
                               f (a,_) Splitted    = (a+1,Splitted)
                               ys = scanl f (0,Chunked "") ((intersperse Splitted . map Chunked . T.lines) t)
@@ -61,24 +64,27 @@ chunkLines (b,_e,(t,m)) = let f (a,_) (Chunked x) = let l = T.length x in (a+l, 
                           in map g (zip ys (tail ys))
 
 
-lineSplitAnnot :: Int -> AnnotText -> [[AnnotText]]
-lineSplitAnnot n (AnnotText tagged) = 
-  let marked = markPosition tagged
+lineSplitAnnot :: tag -> Int -> AnnotText tag -> [[AnnotText tag]]
+lineSplitAnnot def n (AnnotText tagged) = 
+  let marked = markPosition def tagged
       chunked = concatMap chunkLines marked
-      renormed = map (map (\(b,e,x) -> (b,e,unChunk x))) . splitWhen (\(_,_,x) -> x == Splitted) $ chunked
+      renormed = map (map (\(b,e,x) -> (b,e,unChunk x))) . splitWhen (\case (_,_,Splitted) -> True ; _ -> False) $ chunked
   in map (map (AnnotText . map (\(_,_,x)->x)) . chunkEveryAt n) renormed
 
 
-cutePrintAnnot :: AnnotText -> IO ()
-cutePrintAnnot at = do
+cutePrintAnnot :: (tag -> Bool) -> AnnotText tag -> IO ()
+cutePrintAnnot f at = do
   let uat = unAnnotText at
-      al = foldr (\(x,y) acc -> if (y == True) then (T.append (T.replicate (T.length x) "-") acc) else (T.append (T.replicate (T.length x) " ") acc)) "" uat
+      al = foldr (\(x,tag) acc -> if (f tag == True)
+                                  then (T.append (T.replicate (T.length x) "-") acc)
+                                  else (T.append (T.replicate (T.length x) " ") acc)) "" uat
 
   TIO.putStrLn $ T.intercalate "" $ map (\x -> fst x) uat
   TIO.putStrLn al
 
-cutePrintOnlyAnnot :: AnnotText -> IO ()
-cutePrintOnlyAnnot at = do
+
+cutePrintOnlyAnnot :: (tag -> Bool) -> AnnotText tag -> IO ()
+cutePrintOnlyAnnot f at = do
   let uat = unAnnotText at
-  print $ T.intercalate " " $ map (\x -> fst x ) $ filter (\(_,y) -> y) uat
+  print $ T.intercalate " " $ map (\x -> fst x ) $ filter (\(_,y) -> f y) uat
 
