@@ -3,11 +3,8 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Type where
+module Text.Annotation.Type where
 
--- import           Data.Aeson          (ToJSON(..),object,(.=))
--- import           Data.Csv     as CSV hiding ((.=))
--- import           Data.Default        (Default,def)
 import           Data.Text           (Text)
 
 

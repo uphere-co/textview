@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module View where
+module Text.Annotation.View where
 
 import           Data.List                     (intersperse)
 import           Data.List.Split               (splitWhen)
@@ -10,7 +10,7 @@ import           Data.Text                     (Text)
 import qualified Data.Text              as T
 import qualified Data.Text.IO           as TIO
 --
-import           Type
+import           Text.Annotation.Type
 
 
 data Chunk a = Chunked  a
