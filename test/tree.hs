@@ -6,7 +6,7 @@ import           Data.Text
 import qualified Data.Text.IO as T.IO
 import           Data.Tree
 --
-import Text.Format.Tree
+import           Text.Format.Tree
 
 
 mytree :: Tree Text
