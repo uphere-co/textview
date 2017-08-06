@@ -73,24 +73,24 @@ lineSplitAnnot def n (AnnotText tagged) =
   in map (map (AnnotText . map (\(_,_,x)->x)) . chunkEveryAt n) renormed
 
 
-cutePrintAnnotWithLabel :: (tag -> Maybe Text) -> AnnotText tag -> IO ()
-cutePrintAnnotWithLabel lblf at = do
+underlineAnnotWithLabel :: (tag -> Maybe Text) -> AnnotText tag -> [Text]
+underlineAnnotWithLabel lblf at =
   let uat = unAnnotText at
       step (x,tag) acc = let n = T.length x
                          in case lblf tag of
                               Just lbl -> T.append (T.take n (lbl <> T.replicate n "-")) acc
                               Nothing  -> T.append (T.replicate n " ") acc
       al = foldr step "" uat
-  TIO.putStrLn $ T.intercalate "" $ map (\x -> fst x) uat
-  TIO.putStrLn al
+  in [T.intercalate "" (map (\x -> fst x) uat), al]
 
 
-cutePrintAnnot :: (tag -> Bool) -> AnnotText tag -> IO ()
-cutePrintAnnot f = cutePrintAnnotWithLabel (\x -> if f x then Just "" else Nothing)
+underlineAnnot :: (tag -> Bool) -> AnnotText tag -> [Text]
+underlineAnnot f = underlineAnnotWithLabel (\x -> if f x then Just "" else Nothing)
 
 
+{- 
 cutePrintOnlyAnnot :: (tag -> Bool) -> AnnotText tag -> IO ()
 cutePrintOnlyAnnot f at = do
   let uat = unAnnotText at
   print $ T.intercalate " " $ map (\x -> fst x ) $ filter (\(_,y) -> f y) uat
-
+-}
