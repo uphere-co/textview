@@ -2,7 +2,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TupleSections #-}
 
-module Util.Doc where
+module Text.Annotation.Util.Doc where
 
 import           Control.Lens
 import           Control.Monad.Trans.State        (State,runState,get,put)

@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module ParserCustom where
+module Text.Search.ParserCustom where
 
 import           Control.Applicative
 import           Control.Monad.State.Lazy        (State,get,put)
@@ -9,7 +9,7 @@ import           Control.Monad.Trans.Either      (EitherT(..),left,right)
 import           Data.Maybe                      (catMaybes,isNothing) 
 import           Data.Tree
 --
-import           Generic.SearchTree
+import           Text.Search.Generic.SearchTree
 
 
 type ParserG tok = EitherT String (State [tok])

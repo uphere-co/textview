@@ -1,18 +1,13 @@
-module SearchTree where
+module Text.Search.SearchTree where
 
 import           Control.Applicative
 import           Control.Monad                        (mzero,void)
 import           Data.Attoparsec.Text                 
 import qualified Data.Attoparsec.Internal.Types as AT (Parser(..),fromPos)
-
-
 import           Data.Maybe                           (catMaybes) 
-
-
-
 import           Data.Tree
 --
-import           Generic.SearchTree
+import           Text.Search.Generic.SearchTree
 
 pTree :: Forest (Maybe Char) -> String -> Parser (String,Int)
 pTree forest acc = 

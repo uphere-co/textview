@@ -1,4 +1,4 @@
-module Generic.SearchTree where
+module Text.Search.Generic.SearchTree where
 
 import           Data.Function          (on)
 import           Data.List              (sortBy)

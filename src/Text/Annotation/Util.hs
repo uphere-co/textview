@@ -2,17 +2,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Util where
+module Text.Annotation.Util where
 
 import           Control.Lens
 import           Data.List                    (foldl')
 import qualified Data.List.Split       as DLS
 import           Data.Text                    (Text)
 import qualified Data.Text             as T
-
 --
--- import Parser
-import Type
+import           Text.Annotation.Type
+
 
 makeFixedString :: Int -> String -> String
 makeFixedString n str = str ++ (replicate (n - (length str)) (' ' :: Char))

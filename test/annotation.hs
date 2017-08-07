@@ -6,11 +6,11 @@ import           Data.Maybe      (isJust)
 import           Data.Text       (Text)
 import qualified Data.Text  as T
 --
-import           Type
-import           View
-import           Util.Doc
+import           Text.Annotation.Type
+import           Text.Annotation.View
+import           Text.Annotation.Util.Doc
 --
-import Debug.Trace
+-- import Debug.Trace
 
 
 txt = "I just got reject by 500 Startups (company), Techsters and Y Combinator. And wrote e medium post about it. Here it goes. Lessons learned from a startup rejected by 500 Startups, Techstars and YCombinator The ups and downs, excitement and frustration, of being part of the selection process of the world’s top startup acceleration programs — and being rejected by all of them.\n By reading this article’s title you probably think my business is just bad — and it’s fine I won’t judge you — but please read the full story before reaching a conclusion."

@@ -17,14 +17,14 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:
-                    ParserCustom
-                    SearchTree
-                    Generic.SearchTree
+                    Text.Annotation.Type
+                    Text.Annotation.Util
+                    Text.Annotation.Util.Doc
+                    Text.Annotation.View
                     Text.Format.Tree
-                    Type
-                    Util
-                    Util.Doc
-                    View
+                    Text.Search.ParserCustom
+                    Text.Search.SearchTree
+                    Text.Search.Generic.SearchTree
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.9 && <4.10,
