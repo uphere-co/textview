@@ -17,6 +17,7 @@ data Zipper' a = Z' [a] [a] [a]
 deriving instance (Show a) => Show (Zipper' a)
 
 
-newtype AnnotText = AnnotText { unAnnotText :: [(Text,Bool)] } deriving (Show)
+newtype AnnotText tag = AnnotText { unAnnotText :: [(Text,tag)] }
+                      deriving (Show)
 
 
