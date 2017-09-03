@@ -21,6 +21,7 @@ library
                     Text.Annotation.Util
                     Text.Annotation.Util.Doc
                     Text.Annotation.View
+                    Text.Format.Dot
                     Text.Format.Tree
                     Text.Search.ParserCustom
                     Text.Search.SearchTree
