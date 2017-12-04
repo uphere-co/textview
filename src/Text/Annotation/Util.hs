@@ -8,6 +8,7 @@ import           Control.Applicative          ((<|>))
 import           Control.Lens
 import           Data.Attoparsec.Text
 import qualified Data.Attoparsec.Text  as A
+import           Data.Char                    (isAlpha,isDigit,isMark,isSymbol)
 import           Data.List                    (foldl')
 import qualified Data.List.Split       as DLS
 import           Data.Text                    (Text)
@@ -79,15 +80,24 @@ lenword2 xss = foldl' (\acc xs -> acc + lenword1 xs) 0 xss
 
 --
 
-word =
+character = satisfy (\c -> isAlpha c || isDigit c || (c == '-') || (c == '/'))
+
+symbol =
   (do skipSpace
-      word <- (fmap T.pack $ many1' letter)
-      dot <- string "."
-      return (T.append word dot))
+      w <- (fmap T.pack $ many1' character)
+      s <- string "\195"
+      return (T.append w s))
   <|>
   (do skipSpace
-      word <- (fmap T.pack $ many1' letter)
-      return word)
+      w <- fmap (\c -> T.pack [c]) $ satisfy isSymbol
+      return w
+  )
+
+  
+word =
+  (do skipSpace
+      w <- (fmap T.pack $ many1' character)
+      return w)
 
 apst =
   (do skipSpace
@@ -98,14 +108,34 @@ apst =
   (do skipSpace
       a <- string "'"
       return a)
+  <|>
+{-  (do skipSpace
+      a <- string "&#39;s"
+      s <- many1' space
+      return a)
+  <|> -}
+  (do skipSpace
+      a <- string "&#39;"
+      return a)
+
+bra =
+  (do skipSpace
+      char '('
+      return "-LRB-")
+  <|>
+  (do skipSpace
+      char ')'
+      return "-RRB-")
 
 token = do
   skipSpace
-  t <- word <|> apst <|> string "," <|> string "&"
+  t <- abbr <|> bra <|> apst <|> symbol <|> word <|> string "." <|> string "," <|> string "&"
   return t
 
 
+abbr = string "Inc." <|> string "Corp." <|> string "Ltd." <|> string "Co." <|> string "Mfg." <|> string "S.A." <|> string "C.V." <|> string "E.A." <|> string "E." <|> string "PG&E"
+
 tokenizeText = do
-  tokens <- manyTill token endOfInput
+  tokens <- manyTill token (skipSpace *> endOfInput)
   return tokens
 --  T.split (\c -> (isSpace c) || (c == '\8217'))
