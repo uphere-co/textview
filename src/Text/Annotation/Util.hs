@@ -4,7 +4,10 @@
 
 module Text.Annotation.Util where
 
+import           Control.Applicative          ((<|>))
 import           Control.Lens
+import           Data.Attoparsec.Text
+import qualified Data.Attoparsec.Text  as A
 import           Data.List                    (foldl')
 import qualified Data.List.Split       as DLS
 import           Data.Text                    (Text)
@@ -72,3 +75,30 @@ lenword1 xs  = foldl' (\acc _ -> acc + (1 :: Int)) 0 xs
 
 lenword2 :: [[(Int,Int,Text)]] -> Int
 lenword2 xss = foldl' (\acc xs -> acc + lenword1 xs) 0 xss
+
+
+--
+
+word =
+  (do skipSpace
+      word <- (fmap T.pack $ many1' letter)
+      dot <- string "."
+      return (T.append word dot))
+  <|>
+  (do skipSpace
+      word <- (fmap T.pack $ many1' letter)
+      return word)
+
+token =
+  (do skipSpace
+      w <- word
+      return w)
+  <|>
+  (do skipSpace
+      word <- string ","
+      return word)
+
+tokenizeText = do
+  tokens <- manyTill token endOfInput
+  return tokens
+--  T.split (\c -> (isSpace c) || (c == '\8217'))
