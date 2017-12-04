@@ -89,14 +89,21 @@ word =
       word <- (fmap T.pack $ many1' letter)
       return word)
 
-token =
+apst =
   (do skipSpace
-      w <- word
-      return w)
+      a <- string "'s"
+      s <- many1' space
+      return a)
   <|>
   (do skipSpace
-      word <- string ","
-      return word)
+      a <- string "'"
+      return a)
+
+token = do
+  skipSpace
+  t <- word <|> apst <|> string "," <|> string "&"
+  return t
+
 
 tokenizeText = do
   tokens <- manyTill token endOfInput

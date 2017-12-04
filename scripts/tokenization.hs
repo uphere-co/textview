@@ -8,4 +8,4 @@ import Text.Annotation.Util
 
 main :: IO ()
 main = do
-  print $ parseOnly tokenizeText "Google, Inc."
+  print $ parseOnly tokenizeText "American Express Bank Ltd."
