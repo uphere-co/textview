@@ -7,20 +7,20 @@ import           Data.Tree
 --
 
 
-addTreeItem :: (Eq a, Ord a) => [a] -> Forest (Maybe a) -> Forest (Maybe a)
-addTreeItem []     ts = ts
-addTreeItem (x:xs) ts =
-  let (prev,rest') = break (\t -> rootLabel t == Just x) ts
+addTreeItem :: (Eq a, Ord a) => (Int,[a]) -> Forest (Either Int a) -> Forest (Either Int a)
+addTreeItem (_,[])     ts = ts
+addTreeItem (i,(x:xs)) ts =
+  let (prev,rest') = break (\t -> rootLabel t == Right x) ts
   in case rest' of
-       []           -> sortBy (compare `on` rootLabel) (mkTree (x,xs) : ts )
+       []           -> sortBy (compare `on` rootLabel) (mkTree i (x,xs) : ts )
        matched:rest ->
-         let matched' = matched { subForest = addTreeItem xs (subForest matched)}
+         let matched' = matched { subForest = addTreeItem (i,xs) (subForest matched)}
          in prev ++ (matched' : rest)
 
             
-mkTree :: (a,[a]) -> Tree (Maybe a)
-mkTree (x,(y:ys)) = Node (Just x) [mkTree (y,ys)]
-mkTree (x,[])     = Node (Just x) [Node Nothing []]
+mkTree :: Int -> (a,[a]) -> Tree (Either Int a)
+mkTree i (x,(y:ys)) = Node (Right x) [mkTree i (y,ys)]
+mkTree i (x,[])     = Node (Right x) [Node (Left i) []]
 
 
 searchForestBy :: (a -> b -> Bool) -> [a] -> Forest (Maybe b) -> [Maybe b]
