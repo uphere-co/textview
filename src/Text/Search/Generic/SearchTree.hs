@@ -7,41 +7,40 @@ import           Data.Tree
 --
 
 
-addTreeItem :: (Eq a, Ord a) => (Int,[a]) -> Forest (Either Int a) -> Forest (Either Int a)
-addTreeItem (_,[])     ts = ts
-addTreeItem (i,(x:xs)) ts =
-  let (prev,rest') = break (\t -> rootLabel t == Right x) ts
+addTreeItem :: (Eq a, Ord a) => [a] -> Forest (Maybe a) -> Forest (Maybe a)
+addTreeItem []     ts = ts
+addTreeItem (x:xs) ts =
+  let (prev,rest') = break (\t -> rootLabel t == Just x) ts
   in case rest' of
-       []           -> sortBy (compare `on` rootLabel) (mkTree i (x,xs) : ts )
+       []           -> sortBy (compare `on` rootLabel) (mkTree (x,xs) : ts )
        matched:rest ->
-         let matched' = matched { subForest = addTreeItem (i,xs) (subForest matched)}
+         let matched' = matched { subForest = addTreeItem xs (subForest matched)}
          in prev ++ (matched' : rest)
 
             
-mkTree :: Int -> (a,[a]) -> Tree (Either Int a)
-mkTree i (x,(y:ys)) = Node (Right x) [mkTree i (y,ys)]
-mkTree i (x,[])     = Node (Right x) [Node (Left i) []]
+mkTree :: (a,[a]) -> Tree (Maybe a)
+mkTree (x,(y:ys)) = Node (Just x) [mkTree (y,ys)]
+mkTree (x,[])     = Node (Just x) [Node Nothing []]
 
 
-searchForestBy :: (a -> b -> Bool) -> [a] -> Forest (Either Int b) -> [Either Int b]
+searchForestBy :: (a -> b -> Bool) -> [a] -> Forest (Maybe b) -> [Maybe b]
 searchForestBy _  []     ts = map rootLabel ts
 searchForestBy eq (x:xs) ts =
-  let Right a `meq` Right b = a `eq` b
-      Left _ `meq` Left _ = True
+  let Just a `meq` Just b = a `eq` b
+      Nothing `meq` Nothing = True
       _ `meq` _ = False
-      (_prev,rest') = break (\t -> Right x `meq` rootLabel t) ts
+      (_prev,rest') = break (\t -> Just x `meq` rootLabel t) ts
   in case rest' of
        []           -> [] 
        matched:_    -> searchForestBy eq xs (subForest matched)
 
 
-searchForest :: (Eq a) => [a] -> Forest (Either Int a) -> [Either Int a]
+searchForest :: (Eq a) => [a] -> Forest (Maybe a) -> [Maybe a]
 searchForest = searchForestBy (==)
 
 
 
-searchFunc :: (Eq a) => Forest (Either Int a) -> [a] -> [(Maybe Int,[a])]
-searchFunc ts xs = let f x xs = case x of
-                         Left  i -> (Just i, xs)
-                         Right t -> (Nothing, xs ++ [t]) 
-                   in fmap (\x -> f x xs) $ searchForest xs ts
+searchFunc :: (Eq a) => Forest (Maybe a) -> [a] -> [[a]]
+searchFunc ts xs = fmap (\x -> xs ++ maybeToList x) $ searchForest xs ts
+
+
