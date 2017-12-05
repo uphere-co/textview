@@ -23,24 +23,25 @@ mkTree i (x,(y:ys)) = Node (Right x) [mkTree i (y,ys)]
 mkTree i (x,[])     = Node (Right x) [Node (Left i) []]
 
 
-searchForestBy :: (a -> b -> Bool) -> [a] -> Forest (Maybe b) -> [Maybe b]
+searchForestBy :: (a -> b -> Bool) -> [a] -> Forest (Either Int b) -> [Either Int b]
 searchForestBy _  []     ts = map rootLabel ts
 searchForestBy eq (x:xs) ts =
-  let Just a `meq` Just b = a `eq` b
-      Nothing `meq` Nothing = True
+  let Right a `meq` Right b = a `eq` b
+      Left _ `meq` Left _ = True
       _ `meq` _ = False
-      (_prev,rest') = break (\t -> Just x `meq` rootLabel t) ts
+      (_prev,rest') = break (\t -> Right x `meq` rootLabel t) ts
   in case rest' of
        []           -> [] 
        matched:_    -> searchForestBy eq xs (subForest matched)
 
 
-searchForest :: (Eq a) => [a] -> Forest (Maybe a) -> [Maybe a]
+searchForest :: (Eq a) => [a] -> Forest (Either Int a) -> [Either Int a]
 searchForest = searchForestBy (==)
 
 
 
-searchFunc :: (Eq a) => Forest (Maybe a) -> [a] -> [[a]]
-searchFunc ts xs = fmap (\x -> xs ++ maybeToList x) $ searchForest xs ts
-
-
+searchFunc :: (Eq a) => Forest (Either Int a) -> [a] -> [(Maybe Int,[a])]
+searchFunc ts xs = let f x xs = case x of
+                         Left  i -> (Just i, xs)
+                         Right t -> (Nothing, xs ++ [t]) 
+                   in fmap (\x -> f x xs) $ searchForest xs ts

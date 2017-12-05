@@ -4,20 +4,21 @@ import           Control.Applicative
 import           Control.Monad                        (mzero,void)
 import           Data.Attoparsec.Text                 
 import qualified Data.Attoparsec.Internal.Types as AT (Parser(..),fromPos)
+import           Data.Either                          (lefts,rights)
 import           Data.Maybe                           (catMaybes) 
 import           Data.Tree
 --
 import           Text.Search.Generic.SearchTree
 
-pTree :: Forest (Maybe Char) -> String -> Parser (String,Int)
+pTree :: Forest (Either Int Char) -> String -> Parser (String,Int)
 pTree forest acc = 
   let lst = searchForest acc forest
-      lst' = catMaybes lst
+      lst' = rights lst
   in (satisfy (\c -> c `elem` lst') >>= \x -> pTree forest (acc++[x]))
      <|>
-     if Nothing `elem` lst then getPos >>= \e -> tokencloser >> return (acc,e) else mzero
+     if (not $ null $ lefts lst) then getPos >>= \e -> tokencloser >> return (acc,e) else mzero
 
-pTreeAdv :: Forest (Maybe Char) -> Parser (Int,Int,String)
+pTreeAdv :: Forest (Either Int Char) -> Parser (Int,Int,String)
 pTreeAdv forest = skipTill anyChar p
   where p = do
           b <- getPos
