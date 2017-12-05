@@ -23,6 +23,9 @@ library
                     Text.Annotation.View
                     Text.Format.Dot
                     Text.Format.Tree
+                    Text.Search.New.ParserCustom
+                    Text.Search.New.SearchTree
+                    Text.Search.New.Generic.SearchTree
                     Text.Search.ParserCustom
                     Text.Search.SearchTree
                     Text.Search.Generic.SearchTree
