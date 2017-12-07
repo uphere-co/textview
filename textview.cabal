@@ -52,6 +52,8 @@ test-suite test-search
   other-modules:       
   main-is: test-search.hs
   build-depends:       base
+                     , containers
+                     , text
                      , textview
                      --
                      , tasty
