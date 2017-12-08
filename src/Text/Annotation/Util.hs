@@ -4,7 +4,12 @@
 
 module Text.Annotation.Util where
 
+import           Control.Applicative          ((<|>))
 import           Control.Lens
+import           Data.Attoparsec.Combinator   (lookAhead)
+import           Data.Attoparsec.Text
+import qualified Data.Attoparsec.Text  as A
+import           Data.Char                    (isAlpha,isControl,isDigit,isMark,isNumber,isSymbol,isPunctuation)
 import           Data.List                    (foldl')
 import qualified Data.List.Split       as DLS
 import           Data.Text                    (Text)
@@ -72,3 +77,110 @@ lenword1 xs  = foldl' (\acc _ -> acc + (1 :: Int)) 0 xs
 
 lenword2 :: [[(Int,Int,Text)]] -> Int
 lenword2 xss = foldl' (\acc xs -> acc + lenword1 xs) 0 xss
+
+
+--
+
+character = satisfy (\c -> isAlpha c || isDigit c || (c == '-') || (c == '/') || (c == ':'))
+
+skipSpaceMatch1Char p = skipSpace >> fmap T.singleton (satisfy p)
+
+punc = skipSpaceMatch1Char isPunctuation
+  
+symbol =
+  (do skipSpace
+      w <- (fmap T.pack $ many1' character)
+      s <- string "\195"
+      return (T.append w s))
+  <|>
+  skipSpaceMatch1Char isSymbol
+
+
+onumber = skipSpaceMatch1Char isNumber
+  
+mark    = skipSpaceMatch1Char isMark
+
+control = skipSpaceMatch1Char isControl
+  
+word =
+  (do skipSpace
+      w <- (fmap T.pack $ many1' character)
+      c <- string ".com"
+      return (T.append w c))
+  <|>
+  (do skipSpace
+      w <- (fmap T.pack $ many1' character)
+      c <- string ".COM"
+      return (T.append w c))
+  <|>
+  (do skipSpace
+      w <- (fmap T.pack $ many1' character)
+      c <- string ".Com"
+      return (T.append w c))
+  <|>
+  (do skipSpace
+      w <- (fmap T.pack $ many1' character)
+      c <- string ".net"
+      return (T.append w c))
+  <|>
+  (do skipSpace
+      w <- (fmap T.pack $ many1' character)
+      c <- string ".edu"
+      return (T.append w c))
+  <|>
+  (do skipSpace
+      w <- (fmap T.pack $ many1' character)
+      c <- string ".xyz"
+      return (T.append w c))
+  <|>
+  (do skipSpace
+      w <- (fmap T.pack $ many1' character)
+      return w)
+  
+
+apst =
+  (do skipSpace
+      a <- string "'s"
+      s <- many1' space
+      return a)
+  <|>
+  (do skipSpace
+      a <- string "'s"
+      c <- lookAhead (string ",")
+      return a
+  )
+  <|>
+  (do skipSpace
+      a <- string "'"
+      return a)
+  <|>
+{-  (do skipSpace
+      a <- string "&#39;s"
+      s <- many1' space
+      return a)
+  <|> -}
+  (do skipSpace
+      a <- string "&#39;"
+      return a)
+
+bra =
+  (do skipSpace
+      char '('
+      return "-LRB-")
+  <|>
+  (do skipSpace
+      char ')'
+      return "-RRB-")
+
+token = do
+  skipSpace
+  t <- abbr <|> bra <|> apst <|> symbol <|> word <|> string "." <|> string "," <|> string "&" <|> onumber <|> punc <|> control
+  return t
+
+
+abbr = string "Inc." <|> string "Corp." <|> string "Ltd." <|> string "Co." <|> string "Mfg." <|> string "S.A.B." <|> string "S.A.B" <|> string "S.A." <|> string "C.V." <|> string "E.A." <|> string "E." <|> string "PG&E" <|> string "U.S." <|> "A." <|> string "N.V." <|> string "L.P." 
+
+tokenizeText = do
+  tokens <- manyTill token (skipSpace *> endOfInput)
+  return tokens
+--  T.split (\c -> (isSpace c) || (c == '\8217'))
