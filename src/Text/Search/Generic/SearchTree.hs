@@ -13,9 +13,10 @@ addTreeItem (x:xs) ts =
   let (prev,rest') = break (\t -> rootLabel t == Just x) ts
   in case rest' of
        []           -> sortBy (compare `on` rootLabel) (mkTree (x,xs) : ts )
-       matched:rest ->
-         let matched' = matched { subForest = addTreeItem xs (subForest matched)}
-         in prev ++ (matched' : rest)
+       matched:rest -> case xs of
+                         []  -> prev ++ ((matched { subForest = (Node Nothing []) : (subForest matched) } ):rest)
+                         xs' -> let matched' = matched { subForest = addTreeItem xs' (subForest matched)}
+                                in prev ++ (matched' : rest)
 
             
 mkTree :: (a,[a]) -> Tree (Maybe a)
