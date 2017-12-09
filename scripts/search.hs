@@ -4,12 +4,12 @@
 module Main where
 
 import           Control.Monad.IO.Class
-import           Control.Monad.Loops
+-- import           Control.Monad.Loops
 import           Data.Text           (Text)
 import qualified Data.Text    as T
 import qualified Data.Text.IO as TIO
 import           Data.Tree
-import           System.Console.Haskeline
+-- import           System.Console.Haskeline
 --
 import           Text.Search.New.Generic.SearchTree
 import           Text.Search.New.SearchTree

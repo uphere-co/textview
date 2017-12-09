@@ -83,10 +83,9 @@ lenword2 xss = foldl' (\acc xs -> acc + lenword1 xs) 0 xss
 
 character = satisfy (\c -> isAlpha c || isDigit c || (c == '-') || (c == '/') || (c == ':'))
 
-punc = do
-  skipSpace
-  w <- fmap (\c -> T.pack [c]) $ satisfy isPunctuation
-  return w
+skipSpaceMatch1Char p = skipSpace >> fmap T.singleton (satisfy p)
+
+punc = skipSpaceMatch1Char isPunctuation
   
 symbol =
   (do skipSpace
@@ -94,28 +93,14 @@ symbol =
       s <- string "\195"
       return (T.append w s))
   <|>
-  (do skipSpace
-      w <- fmap (\c -> T.pack [c]) $ satisfy isSymbol
-      return w
-  )
+  skipSpaceMatch1Char isSymbol
 
-onumber =
-  (do skipSpace
-      w <- fmap (\c -> T.pack [c]) $ satisfy isNumber
-      return w
-  )
+
+onumber = skipSpaceMatch1Char isNumber
   
-mark =
-  (do skipSpace
-      w <- fmap (\c -> T.pack [c]) $ satisfy isMark
-      return w
-  )
+mark    = skipSpaceMatch1Char isMark
 
-control =
-  (do skipSpace
-      w <- fmap (\c -> T.pack [c]) $ satisfy isControl
-      return w
-  )
+control = skipSpaceMatch1Char isControl
   
 word =
   (do skipSpace
