@@ -5,7 +5,7 @@ module Text.Search.ParserCustom where
 
 import           Control.Applicative
 import           Control.Monad.State.Lazy        (State,get,put)
-import           Control.Monad.Trans.Either      (EitherT(..),left,right)
+import           Control.Monad.Trans.Either      (EitherT,newEitherT,runEitherT,left,right)
 import           Data.Maybe                      (catMaybes,isNothing) 
 import           Data.Tree
 --
@@ -16,8 +16,8 @@ type ParserG tok = EitherT String (State [tok])
 
 
 instance {-# OVERLAPPING #-} Alternative (ParserG tok) where
-  empty = EitherT (return (Left "error"))
-  e1 <|> e2 = EitherT $ do
+  empty = newEitherT (return (Left "error"))
+  e1 <|> e2 = newEitherT $ do
     s <- get
     r1 <- runEitherT e1
     case r1 of

@@ -1,16 +1,15 @@
-{ mkDerivation, base, bytestring, either, lens, split, stdenv, text
-, transformers, attoparsec, containers
-, tasty, tasty-hunit
+{ mkDerivation, attoparsec, base, bytestring, containers, lens, mtl
+, split, stdenv, tasty, tasty-hunit, text, transformers
+, transformers-either
 }:
 mkDerivation {
   pname = "textview";
   version = "0.1.0.0";
   src = ./.;
   libraryHaskellDepends = [
-    base bytestring either lens split text transformers attoparsec
+    attoparsec base bytestring containers lens mtl split text
+    transformers transformers-either
   ];
-  testHaskellDepends = [
-    base containers text tasty tasty-hunit
-  ];
+  testHaskellDepends = [ base containers tasty tasty-hunit text ];
   license = "unknown";
 }
